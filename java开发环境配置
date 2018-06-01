@@ -1,0 +1,7 @@
+1.jdk安装,环境变量设置;
+2.eclipse下载 安装;
+3.maven插件安装,设置代理,本地仓库;
+4.start.spring.io生成项目;
+5.eclipse设置maven配置;
+6.eclipse导入maven项目,maven uodateproject;
+7.报错,右键强制 update
