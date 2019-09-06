@@ -130,3 +130,138 @@
 			   s+=1;  //编译成功
 	1> s+1 时,1 属于 int 类型,相加后结果为int类型;
 	2> s+=1,相当于s=(short)(s+1),自动进行了数据类型转换;
+16.Integer的创建:
+	1> 创建Integer对象时,如果传入的 int 值在 -128~127 时,则将该对象加入常量池,后续该值的integer对象指向同一个对象;
+	2> 超出-128~127 范围的,则每次都会新建integer对象,即使两个对象的值相同.
+17.Java接口的继承:
+	1>接口可以被继承;
+	2>继承者也是接口,且可以重载override父接口(P_Interface)中抽象方法,重载后该方法在子接口(C_Interface)中可变为具体方法;
+	3>当实现类(G_Class) implements 实现子接口(C_Interface),重载方法时可以显式的调用子接口中的实现,Eg:
+		@override
+		public void hello(){
+			//可以实现多个接口,显式调用接口实现方法
+			//也可在实现类中自己实现
+			C_Interface_1.super.hello();
+			C_Interface_2.super.hello();
+		}
+18.Java对象的克隆Clone:
+	两种方式
+	1> 实现Cloneable接口并重写Object类中的 clone 方法;
+	2> 实现Serializable,利用序列化和反序列化来克隆,这样得到的对象相当于深拷贝;
+19.Java序列化Serializable:
+	#序列化特点:
+		1> 父类可以被序列化则子类也可以被序列化
+		2> static 静态变量和transient(临时数据)不能被序列化:
+			静态变量或常量属于类而不属于某个对象,序列化是针对对象的操作;
+		3> 如果父类没有实现 Serializable 接口,那么反序列化子类时会调用父类的 空构造 方法,如果父类没有该方法则会报错
+			如果父类实现了Serializable,则反序列化子类时不会调用父类空构造
+	#Java序列化过程
+		1> 使用 ObjectOutputStream.rwiteObject() 将对象写入文件流或者字节流中;
+		2> 使用 ObjectInputStream.readObject(),从文件流或字节流等流中反序列化出来;
+20.HashMap,HashTable,HashSet:
+	1>HashMap实现参照之前;
+	2>HashTable:
+		(1)HashTable基于Dictionary类,而HashMap实现了Map接口;
+		(2)HashTable不允许 null 作为键或者值,而HashMap允许一个 null 键和多个 null 值;
+		(3)HashTable线程安全,HashMap不安全;
+		(4)HashTable的hash值直接使用,而HashMap计算完hashCode之后会进行其他计算(与Map长度值-1 做与运算);
+		(5)HashTable初始11,扩充时2*old+1,HashMap初始16,扩充时2*old;
+	3>HashSet底层使用HashMap实现,元素值都存在于HashMap key中,value为一个常量对象(new Object()),非线程安全;
+	#Tips:
+		1>Vector也是线程安全的;
+		2>线程安全的集合类型无非就是在核心方法上增加 synchronized 关键字;
+		3>Collections工具类提供的API可以让不安全的集合变为线程安全的,Eg:
+			Collections.synchronizedCollection(c);
+			Collections.synchronizedList(l);
+			...
+21.ArrayList内部实现:
+	1> ArrayList内部维护一个 Object[] 数组;
+	2> 当List需要扩容时:
+		(1) 当前长度小于6,则一次性分配12个长度;
+		(2) 当前长度大于6,则一次性增加当前长度的 1/2(new_size=size+size>>>1,移位运算比 /2 数学计算快).
+22.ConcurrentHashMap:
+	1>JDK 1.8之前,通过HashEntry和Segment数组实现,一个Map由n个Segment数组组成,一个Segment包含n个HashEntry键值对
+	2>内部采用分段锁机制,最大支持16个线程并发,访问不同的table块
+
+23.数组和链表:
+	1> 数组在内存中需要一段连续的空间,且创建时需要指定大小,空间利用率不高,不利于扩展,查询快速,修改缓慢;
+	2> 链表不需要连续的内存空间,动态扩展大小,适合频繁的插入,删除操作
+24.Static代码块执行时机:
+	1>调用静态变量或静态方法时(注:当静态变量被 final 修饰即常量时,不会调用static代码块);
+	2>类初始化时,static 代码块先于初始化方法执行;
+25.ThreadLocal:
+	线程局部变量 ，是 Java中一种较为特殊的线程绑定机制，可以为每一个使用该变量的线程都提供一个变量值的副本，
+	并且每一个线程都可以独立地改变自己的副本，而不会与其它线程的副本发生冲突.
+26.Runnable和Callable的区别:
+	1>Runnable 规定的方法是run(),Callable规定的方法是call();
+	2>run方法没有返回值,call方法可以有返回值;
+	3>call方法可以抛出异常,run方法不能抛出异常;
+	4>运行Callable任务可以获得一个 Future对象,表示异步计算的结果,可以获取任务结果,状态,对任务进行终止;
+27.ExecutorService/Executors:
+	1>ExecutorService pool=Executors.newFixedThreadPool(3);
+		通过线程池工厂类 Executors 可创建 固定大小线程池,可变连接池,单一连接池,延迟连接池
+	2>固定大小连接池: 无论添加多少个任务,始终起指定的N各线程去执行任务
+	  其他类型连接池根据名称即可推断特点;
+	3>连接池的执行方式:
+		execute(Runnable):无法得知 Runnable对象的执行结果
+		submit(Runnable/Callable): 返回一个Future对象,通过future对象可以得知任务的执行状态,如果执行的是Callable对象,则Future对象还可以获取执行Callable执行后的返回值;
+		invokeAny(Set<Callable>/List<Callable>): 接收一个Callable对象的集合,只要集合中任何一个任务结束(正常结束或者抛出异常),则其他Callable任务讲被终止,所以返回的是单一结果;
+		invokeAll(et<Callable>/List<Callable>): 接收一个Callable对象的集合,返回一个Future对象的集合,标识所有任务的结果,会执行完所有任务(但是无法得知单一任务是正常结束还是异常);
+	4>连接池的终止方式:
+		shutdown: 终止空闲的线程,已经提交任务的无法终止;
+		shutdownNow:interrupt所有线程,因此大部分线程将被终止.
+28.ForkJoinPool:
+	1>合并和分叉线程池;
+	2>允许执行RecursiveAction(无返回值)和RecursiveTask(有返回值);
+	3>自定义任务类可以继承 RecursiveAction 或 RecursiveTask;
+	4>任务可以进一步被拆分成若干个子任务;
+	5>ForkJoinPool.invoke(RecursiveAction/RecursiveTask),获取结果.
+29.Java并发队列:
+	#阻塞队列 BlockingQueue(使用锁实现)
+		1>公平锁:在并发环境中,每个线程在获取锁时会先查看此锁维护的等待队列,如果为空或者当前线程排第一,则该线程获得锁
+			非公平锁:每个线程上来就尝试获得锁,如果获取失败则再采用公平锁的机制获取锁
+		2>
+	#非阻塞队列(使用CAS算法实现)
+	
+30.Java线程池排队和并发策略:
+	1>线程池参数解读:
+		ThreadPoolExecutor(int corePoolSize,
+		  int maximumPoolSize,
+		  long keepAliveTime,
+		  TimeUnit unit,
+		  BlockingQueue<Runnable> workQueue,
+		  ThreadFactory threadFactory,
+		  RejectedExecutionHandler handler)
+		(1)corePoolSize:核心线程数(池中保留线程数),包括空闲线程.线程池初始化并不会立即创建新线程,直到有任务提交,才新建线程使线程数量逐渐达到corePoolSize;
+		(2)maximumPoolSize:最大线程数.当核心线程数满,并且阻塞队列也满时,才会判断当前线程数是否小于最大线程数,从而决定是否新建线程;
+		(3)keepAliveTime:空闲线程的存活时间,当超过设定时间后,大于核心线程数的空闲线程会被终止(也可通过其他参数设置核心线程中的空闲线程也被终止);
+		(4)unit:keepAliveTime 的时间单位;
+		(5)workQueue:当线程数量大于等于核心线程数时,用于存储任务的队列,包括有界,无界队列,优先级队列等;
+		(6)threadFactory:执行程序创建新线程时的工厂
+		(7)handler:当最大线程数和阻塞队列都满时,线程的抛弃策略(详细见之后)
+	2>线程池阻塞队列:
+		(1)无界队列 LinkedBlockingQueue:
+			newSingleThreadExecutor 和 newFixedThreadPool 都使用无界队列
+			##当无界队列不设定大小时,池中创建的线程不会超过 corePoolSize,此时 maximumPoolSize(最大线程数)也就没有限制意义,多余的任务会缓存进无界队列;
+			##只有当无界队列设定了大小时,如果任务数量超过最大线程数和队列大小之和时,才会用到拒绝策略
+			#Tips: 使用无界队列时,队列大小没有限制,任务过多时可能会造成 OOM;
+		(2)有界队列:
+			ArrayBlockingQueue:
+			PriorityBlockingQueue: 任务优先级排序需要任务的Comparator来决定
+			#有界队列能有效防止资源耗尽,但可能比较难控制,需要队列大小和线程池大小配合使用
+		(3)直接提交(同步移交队列):
+			SynchronousQueue:并不是一个真正的队列,而是一种移交机制.类似于生产者-消费者模式,一端将任务放入队列,一端(线程池)取出任务;
+			#直接提交,线程池不会对任务进行缓存,每当有新任务时,会直接创建新线程来执行任务,需要线程池有无限容量
+		(4)延时队列:
+			DelayedWorkQueue:是 ScheduledThreadPoolExecutor 的静态内部类,定时线程池使用DelayedWorkQueue来创建线程
+			#执行线程时可指定延迟时间
+	3>线程池拒绝策略:
+		(1)饱和策略:AbortPolicy
+			当任务数量大于线程池最大线程数和阻塞队列容量时,丢弃新添加的任务并抛出异常 RejectedExecutionException
+			#这种情况需要线程池有限制数量,而阻塞队列需要时有界队列或限制大小的无界队列.
+		(2)丢弃策略 DiscardPolicy:
+			当任务数量大于最大线程数和队列容量时,新增加的任务将被丢去,但不会抛出异常
+		(3)丢弃任务策略 DiscardOldestPolicy:
+			当任务数量大于最大线程数和队列容量时,丢弃缓存在队列中的头部元素即最先加入队列的元素
+		(4)调用者运行策略 CallerRunsPolicy:
+			当线程池饱和之后,新添加的任务将退回给调用线程池的主线程直接运行,主线程运行任务期间无法再提交新的任务
